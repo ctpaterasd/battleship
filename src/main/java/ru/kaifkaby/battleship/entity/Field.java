@@ -33,15 +33,13 @@ public class Field {
         }
     }
 
-    // TODO: нужен?
-    public Cell[][] getCells() {
-        return _cells;
+    public Cell getCell(int x, int y) {
+        return _cells[x][y];
     }
 
     // TODO: нужен?
-    public Cell getCell(int x, int y) {
-        validateXY(x, y);
-        return _cells[x][y];
+    public Cell[][] getCells() {
+        return _cells;
     }
 
     // TODO: нужен?
@@ -49,82 +47,27 @@ public class Field {
         return _ships;
     }
 
-    // TODO: нужен?
-    public Ship getShip(int x, int y) {
-        validateXY(x, y);
-        Ship ship = _cells[x][y].getShip();
-        if (ship != null) {
-            return ship;
-        }
-        throw new GameplayException("No ship at x: " + x + " y: " + y);
-    }
-
-    public Ship getUnboardedShip(int size) {
-        return getShipByCondition(size, ship -> !ship.isOnField());
-    }
-
-    public Ship getBoardedShip(int size) {
-        return getShipByCondition(size, Ship::isOnField);
-    }
-
-    @SuppressWarnings("ClassEscapesDefinedScope")
-    public Ship getShipByCondition(int size, ShipCondition condition) {
-        validateSize(size);
-        int count = HALF_FIELD_SIZE - size;
-        int start = ((count - 1) * count) / 2;
-        for (int i = start; i < start + count; i++) {
-            if (condition.check(_ships[i])) {
-                return _ships[i];
-            }
-        }
-        throw new GameplayException("No ships available");
-    }
-
-    // TODO: Заменить 3 метода выше на это, если getShipByCondition не понадобится для другого.
-//    public Ship getUnboardedShip(int size) {
-//        validateSize(size);
-//        int count = HALF_FIELD_SIZE - size;
-//        int start = ((count - 1) * count) / 2;
-//        for (int i = start; i < start + count; i++) {
-//            if (!_ships[i].isOnField()) {
-//                return _ships[i];
-//            }
-//        }
-//        throw new GameplayException("No ships available");
-//    }
-
     public void unboardAllShips() {
         for (int i = 0; i < FIELD_SIDE_SIZE; i++) {
             unboardShip(_ships[i]);
         }
     }
 
-    public void unboardShip(int x, int y) {
-        validateXY(x, y);
-        Ship ship = _cells[x][y].getShip();
-        if (ship == null) {
-            throw new GameplayException("No ship at x: " + x + " y: " + y);
-        }
-        unboardShip(ship);
-    }
-
-    //TODO: Заменить на 1 метод если один из не понадобится
     public void unboardShip(Ship ship) {
-        ship.unboard();
-        Cell[] cells = ship.getCells();
-        for (int i = 0; i < cells.length; i++) {
-            cells[i].resetShip();
+        if (ship.isOnField()) {
+            ship.unboard();
+            Cell[] cells = ship.getCells();
+            for (int i = 0; i < cells.length; i++) {
+                cells[i].resetShip();
+            }
+            _shipsOnBoard--;
         }
-        _shipsOnBoard--;
     }
 
-    //TODO: Заменить на 1 метод если один из не понадобится
     public void tryBoardAt(Ship ship, Cell startCell) {
-        tryBoardAt(ship, startCell.getX(), startCell.getY());
-    }
+        int x = startCell.getX();
+        int y = startCell.getY();
 
-    public void tryBoardAt(Ship ship, int x, int y) {
-        validateXY(x, y);
         int shipSize = ship.getSize();
         boolean isHorizontal = ship.isHorizontal();
 
@@ -169,9 +112,7 @@ public class Field {
         return _shipsOnBoard != FIELD_SIDE_SIZE;
     }
 
-    public void shoot(int x, int y) {
-        validateXY(x, y);
-        Cell cell = _cells[x][y];
+    public void shoot(Cell cell) {
         cell.shoot();
         if (cell.hasShip()) {
             Ship ship = cell.getShip();
@@ -180,22 +121,5 @@ public class Field {
                 _aliveShips--;
             }
         }
-    }
-
-    private void validateXY(int x, int y) {
-        if (x < 0 || x >= FIELD_SIDE_SIZE || y < 0 || y >= FIELD_SIDE_SIZE) {
-            throw new GameplayException("Invalid coordinates");
-        }
-    }
-
-    private void validateSize(int size) {
-        if (size < 1 || size >= HALF_FIELD_SIZE) {
-            throw new GameplayException("Invalid size");
-        }
-    }
-
-    interface ShipCondition {
-
-        boolean check(Ship ship);
     }
 }
