@@ -2,6 +2,7 @@ package ru.kaifkaby.battleship.entity;
 
 import ru.kaifkaby.battleship.exception.GameplayException;
 import ru.kaifkaby.battleship.exception.InternalException;
+import ru.kaifkaby.battleship.ui.cell.CellUI;
 
 public class Cell {
 
@@ -9,6 +10,7 @@ public class Cell {
     private final int _y;
     private Ship _ship;
     private boolean _damaged;
+    private CellUI _cellUI;
 
     public Cell(int x, int y) {
         _x = x;
@@ -52,5 +54,13 @@ public class Cell {
 
     public boolean isDamaged() {
         return _damaged;
+    }
+
+    public CellUI getUICell() {
+        return _cellUI;
+    }
+
+    public void setUICell(CellUI cellUI) {
+        _cellUI = cellUI;
     }
 }

@@ -1,6 +1,10 @@
 package ru.kaifkaby.battleship.ui;
 
+import ru.kaifkaby.battleship.entity.Cell;
 import ru.kaifkaby.battleship.entity.Field;
+import ru.kaifkaby.battleship.entity.Ship;
+import ru.kaifkaby.battleship.exception.GameplayException;
+import ru.kaifkaby.battleship.ui.cell.CellUI;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,24 +18,52 @@ public class GameWindow extends JFrame {
 
     private Field playerField;
     private Field aiField;
+    private ShipList shipList;
+    private Checkbox horizontalCheckBox;
 
     public GameWindow() {
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            if (e instanceof GameplayException) {
+                JOptionPane.showMessageDialog(this,
+                        e.getMessage(), "Ошибка", JOptionPane.ERROR_MESSAGE);
+            } else {
+                System.err.print("Exception in thread \""
+                        + t.getName() + "\" ");
+                e.printStackTrace(System.err);
+            }
+        });
+    }
+
+    public void boardShip(Ship ship, Cell cell) {
+        ship.setDimension(!horizontalCheckBox.getState());
+        playerField.tryBoardAt(ship, cell);
+        shipList.deleteShip(ship);
+    }
+
+    public void unboardShip(Ship ship) {
+        playerField.unboardShip(ship);
+        shipList.addShip(ship);
+    }
+
+    public Ship getSelectedShip() {
+        return shipList.getSelectedShip();
     }
 
     public void init() {
+        playerField = new Field();
+        aiField = new Field();
+
         JFrame frame = new JFrame("BattleShip");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(1800, 800);
         frame.setLayout(new BorderLayout());
 
-        JPanel textPanel = createTextPanel();
+        JPanel textPanel = createShipListPanel();
         frame.add(textPanel, BorderLayout.WEST);
 
         JPanel mainPanel = new JPanel(new GridBagLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        playerField = new Field();
-        aiField = new Field();
         JPanel player1Panel = createFieldPanel(playerCells, "Player", playerField);
         JPanel player2Panel = createFieldPanel(aiCells, "AI", aiField);
 
@@ -64,6 +96,7 @@ public class GameWindow extends JFrame {
         for (int row = 0; row < GRID_SIZE; row++) {
             for (int col = 0; col < GRID_SIZE; col++) {
                 CellUI cellUI = new CellUI(gameField.getCell(row, col), this);
+                gameField.getCell(row, col).setUICell(cellUI);
                 field[row][col] = cellUI;
                 gridPanel.add(cellUI);
             }
@@ -73,24 +106,21 @@ public class GameWindow extends JFrame {
         return panel;
     }
 
-    private JPanel createTextPanel() {
+    private JPanel createShipListPanel() {
         JPanel textPanel = new JPanel();
         textPanel.setLayout(new BorderLayout());
         textPanel.setPreferredSize(new Dimension(200, 0));
         textPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-        JLabel titleLabel = new JLabel("Game Info", SwingConstants.CENTER);
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        JLabel titleLabel = new JLabel("<html>Выберите корабль<br>для расстановки</html>", SwingConstants.CENTER);
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 15));
         textPanel.add(titleLabel, BorderLayout.NORTH);
 
-        JTextArea textArea = new JTextArea();
-        textArea.setText("Welcome to Sea Battle!\n\n- Left Field: Player 1\n- Right Field: Player 2\n\nClick a cell to attack.");
-        textArea.setEditable(false);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
+        shipList = new ShipList(playerField);
+        textPanel.add(shipList, BorderLayout.CENTER);
 
-        JScrollPane scrollPane = new JScrollPane(textArea);
-        textPanel.add(scrollPane, BorderLayout.CENTER);
+        horizontalCheckBox = new Checkbox("Расположить горизонтально");
+        textPanel.add(horizontalCheckBox, BorderLayout.SOUTH);
 
         return textPanel;
     }

@@ -55,6 +55,10 @@ public class Ship {
         _horizontal = !_horizontal;
     }
 
+    public void setDimension(boolean horizontal) {
+        _horizontal = horizontal;
+    }
+
     public void shoot() {
         _alive = --_health != 0;
     }
