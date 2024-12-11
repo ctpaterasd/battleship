@@ -4,12 +4,10 @@ import ru.kaifkaby.battleship.ui.GameWindow;
 
 import javax.swing.SwingUtilities;
 
-public class SeaBattleWithTextPanel {
+public class BattleShipApp {
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         GameWindow window = new GameWindow();
         SwingUtilities.invokeLater(window::init);
-        Thread.sleep(1000);
-        System.out.println();
     }
 }

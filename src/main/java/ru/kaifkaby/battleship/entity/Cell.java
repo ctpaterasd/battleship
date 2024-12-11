@@ -50,6 +50,7 @@ public class Cell {
             throw new GameplayException("Cell already shot");
         }
         _damaged = true;
+        _cellUI.repaint();
     }
 
     public boolean isDamaged() {

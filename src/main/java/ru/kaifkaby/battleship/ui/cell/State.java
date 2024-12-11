@@ -8,6 +8,7 @@ public abstract class State {
 
     public State(CellUI cellUI) {
         _cellUI = cellUI;
+        _cellUI.repaint();
         for (ActionListener actionListener : _cellUI.getActionListeners()) {
             _cellUI.removeActionListener(actionListener);
         }

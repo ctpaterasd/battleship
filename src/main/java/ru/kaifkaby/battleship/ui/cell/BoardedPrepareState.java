@@ -18,6 +18,7 @@ public class BoardedPrepareState extends State {
             Arrays.stream(ship.getCells()).map(Cell::getUICell).forEach(cell -> {
                 cell.setBackground(Color.CYAN);
                 cell.setState(new EmptyPrepareState(cell));
+                _cellUI.setEnabled(true);
             });
             _cellUI.getGameWindow().unboardShip(ship);
         });

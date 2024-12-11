@@ -2,6 +2,11 @@ package ru.kaifkaby.battleship.entity;
 
 import ru.kaifkaby.battleship.exception.GameplayException;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.function.Consumer;
+
 public class Field {
 
     public static final int FIELD_SIDE_SIZE = 10;
@@ -42,23 +47,16 @@ public class Field {
         return _cells;
     }
 
-    // TODO: нужен?
     public Ship[] getShips() {
         return _ships;
-    }
-
-    public void unboardAllShips() {
-        for (int i = 0; i < FIELD_SIDE_SIZE; i++) {
-            unboardShip(_ships[i]);
-        }
     }
 
     public void unboardShip(Ship ship) {
         if (ship.isOnField()) {
             ship.unboard();
             Cell[] cells = ship.getCells();
-            for (int i = 0; i < cells.length; i++) {
-                cells[i].resetShip();
+            for (Cell cell : cells) {
+                cell.resetShip();
             }
             _shipsOnBoard--;
         }
@@ -87,13 +85,11 @@ public class Field {
             } else {
                 nextY = y + i;
             }
-            for (int xi = nextX == 0 ? 0 : -1; xi <= (nextX == FIELD_SIDE_SIZE - 1 ? 0 : 1); xi++) {
-                for (int yi = nextY == 0 ? 0 : -1; yi <= (nextY == FIELD_SIDE_SIZE - 1 ? 0 : 1); yi++) {
-                    if (_cells[nextX + xi][nextY + yi].hasShip()) {
-                        throw new GameplayException("Can't board here");
-                    }
+            doWithNearbyCells(nextX, nextY, cell -> {
+                if (cell.hasShip()) {
+                    throw new GameplayException("Can't board here");
                 }
-            }
+            });
             cells[i] = _cells[nextX][nextY];
         }
 
@@ -112,13 +108,73 @@ public class Field {
         return _shipsOnBoard != FIELD_SIDE_SIZE;
     }
 
+    public Ship getDamagedShip() {
+        for (int i = FIELD_SIDE_SIZE - 1; i >= 0; i--) {
+            Ship ship = _ships[i];
+            if (ship.isDamaged() && ship.isAlive()) {
+                return ship;
+            }
+        }
+        return null;
+    }
+
+    public int getBiggestAliveShipSize(boolean withSingles) {
+        for (int i = FIELD_SIDE_SIZE - 1; i >= 0; i--) {
+            Ship ship = _ships[i];
+            if (ship.isAlive() && (withSingles || ship.getSize() > 1)) {
+                return ship.getSize();
+            }
+        }
+        return 0;
+    }
+
+    public int getBiggestDamagedAliveShipSize(int damagedSize) {
+        for (int i = FIELD_SIDE_SIZE - 1; i >= 0; i--) {
+            Ship ship = _ships[i];
+            if (ship.isDamaged() && ship.isAlive() && ship.getSize() > damagedSize && ship.getSize() > 1) {
+                return ship.getSize();
+            }
+        }
+        return 0;
+    }
+
+    public Cell getRandomFreeCell() {
+        List<Cell> freeCells = new ArrayList<>();
+        for (Cell[] cellsA : _cells) {
+            for (Cell cell : cellsA) {
+                if (!cell.isDamaged()) {
+                    freeCells.add(cell);
+                }
+            }
+        }
+        return freeCells.get(new Random().nextInt(freeCells.size()));
+    }
+
     public void shoot(Cell cell) {
         cell.shoot();
-        if (cell.hasShip()) {
-            Ship ship = cell.getShip();
-            ship.shoot();
-            if (!ship.isAlive()) {
-                _aliveShips--;
+        if (!cell.hasShip()) {
+            return;
+        }
+        Ship ship = cell.getShip();
+        ship.shoot();
+        if (ship.isAlive()) {
+            return;
+        }
+        _aliveShips--;
+        for (Cell shipCell : ship.getCells()) {
+            doWithNearbyCells(shipCell.getX(), shipCell.getY(), cellN -> {
+                if (!cellN.isDamaged()) {
+                    cellN.shoot();
+                    cellN.getUICell().repaint();
+                }
+            });
+        }
+    }
+
+    public void doWithNearbyCells(int x, int y, Consumer<Cell> action) {
+        for (int xi = x == 0 ? 0 : -1; xi <= (x == FIELD_SIDE_SIZE - 1 ? 0 : 1); xi++) {
+            for (int yi = y == 0 ? 0 : -1; yi <= (y == FIELD_SIDE_SIZE - 1 ? 0 : 1); yi++) {
+                action.accept(_cells[x + xi][y + yi]);
             }
         }
     }

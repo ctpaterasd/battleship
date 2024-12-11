@@ -55,7 +55,7 @@ public class ShipList extends JList {
             if (_ships.isEmpty()) {
                 throw new GameplayException("Все корабли этого размера размещены");
             }
-            return _ships.get(0);
+            return _ships.getFirst();
         }
 
         @Override

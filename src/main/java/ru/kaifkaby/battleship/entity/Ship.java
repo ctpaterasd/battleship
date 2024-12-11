@@ -1,7 +1,5 @@
 package ru.kaifkaby.battleship.entity;
 
-import ru.kaifkaby.battleship.exception.InternalException;
-
 public class Ship {
 
     private final int _size;
@@ -51,15 +49,15 @@ public class Ship {
         return _horizontal;
     }
 
-    public void swapDimension() {
-        _horizontal = !_horizontal;
-    }
-
     public void setDimension(boolean horizontal) {
         _horizontal = horizontal;
     }
 
     public void shoot() {
         _alive = --_health != 0;
+    }
+
+    public boolean isDamaged() {
+        return _health != _size;
     }
 }
