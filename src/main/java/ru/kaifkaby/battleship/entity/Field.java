@@ -69,10 +69,10 @@ public class Field {
         boolean isHorizontal = ship.isHorizontal();
 
         if (ship.isOnField()) {
-            throw new GameplayException("Ship is already on field");
+            throw new GameplayException("Корабль уже на поле");
         }
         if (shipSize + (isHorizontal ? x : y) > FIELD_SIDE_SIZE) {
-            throw new GameplayException("Can't board here");
+            throw new GameplayException("Нельзя разместить корабль здесь");
         }
 
         Cell[] cells = new Cell[shipSize];
@@ -86,7 +86,7 @@ public class Field {
             }
             doWithNearbyCells(nextX, nextY, cell -> {
                 if (cell.hasShip()) {
-                    throw new GameplayException("Can't board here");
+                    throw new GameplayException("Нельзя разместить корабль здесь");
                 }
             });
             cells[i] = _cells[nextX][nextY];
@@ -117,10 +117,10 @@ public class Field {
         return null;
     }
 
-    public int getSmallestAliveShipSize(boolean withSingles) {
+    public int getSmallestAliveShipSize() {
         for (int i = FIELD_SIDE_SIZE - 1; i >= 0; i--) {
             Ship ship = _ships[i];
-            if (ship.isAlive() && (withSingles || ship.getSize() > 1)) {
+            if (ship.isAlive()) {
                 return ship.getSize();
             }
         }
@@ -130,7 +130,7 @@ public class Field {
     public int getSmallestDamagedAliveShipSize(int damagedSize) {
         for (int i = FIELD_SIDE_SIZE - 1; i >= 0; i--) {
             Ship ship = _ships[i];
-            if (ship.isDamaged() && ship.isAlive() && ship.getSize() > damagedSize) {
+            if (ship.isAlive() && ship.getSize() > damagedSize) {
                 return ship.getSize();
             }
         }

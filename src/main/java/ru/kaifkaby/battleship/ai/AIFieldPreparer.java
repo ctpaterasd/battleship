@@ -16,6 +16,7 @@ public class AIFieldPreparer {
             while (!placed) {
                 x = rand.nextInt(Field.FIELD_SIDE_SIZE);
                 y = rand.nextInt(Field.FIELD_SIDE_SIZE);
+                ship.setDimension(rand.nextBoolean());
                 try {
                     field.tryBoardAt(ship, field.getCell(x, y));
                     placed = true;

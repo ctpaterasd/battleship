@@ -5,7 +5,6 @@ import ru.kaifkaby.battleship.entity.Cell;
 import ru.kaifkaby.battleship.entity.Field;
 import ru.kaifkaby.battleship.entity.Ship;
 import ru.kaifkaby.battleship.exception.GameplayException;
-import ru.kaifkaby.battleship.ui.cell.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -39,6 +38,9 @@ public class GameWindow extends JFrame {
                 System.err.print("Exception in thread \""
                         + t.getName() + "\" ");
                 e.printStackTrace(System.err);
+                JOptionPane.showMessageDialog(this,
+                        e.getMessage(), "InternalError", JOptionPane.ERROR_MESSAGE);
+                System.exit(1);
             }
         });
     }
@@ -70,12 +72,12 @@ public class GameWindow extends JFrame {
             new AIFieldPreparer().boardShips(aiField);
             for (CellUI[] cellA : playerCells) {
                 for (CellUI cell : cellA) {
-                    cell.setState(new InGameState(cell));
+                    cell.setState(CellUI.State.INGAME_STATE);
                 }
             }
             for (CellUI[] cellA : aiCells) {
                 for (CellUI cell : cellA) {
-                    cell.setState(new InGameStateAI(cell));
+                    cell.setState(CellUI.State.INGAME_STATE_AI);
                 }
             }
             startGameButton.setEnabled(false);

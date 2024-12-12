@@ -2,7 +2,7 @@ package ru.kaifkaby.battleship.entity;
 
 import ru.kaifkaby.battleship.exception.GameplayException;
 import ru.kaifkaby.battleship.exception.InternalException;
-import ru.kaifkaby.battleship.ui.cell.CellUI;
+import ru.kaifkaby.battleship.ui.CellUI;
 
 public class Cell {
 
@@ -40,14 +40,14 @@ public class Cell {
 
     public void setShip(Ship ship) {
         if (_ship != null) {
-            throw new InternalException("Cell already have ship");
+            throw new InternalException("На клетке уже находится корабль");
         }
         _ship = ship;
     }
 
     public void shoot() {
         if (_damaged) {
-            throw new GameplayException("Cell already shot");
+            throw new GameplayException("Клетка уже подстрелена");
         }
         _damaged = true;
         _cellUI.repaint();
