@@ -16,7 +16,7 @@ public class AIShooter {
         Ship ship = _field.getDamagedShip();
         Cell cell = ship != null
                 ? calculateCellForDamagedShip(ship)
-                : calculateCellFirstShot(_field.getBiggestAliveShipSize(true));
+                : calculateCellFirstShot(_field.getSmallestAliveShipSize(true));
         _field.shoot(cell);
         return cell;
     }
@@ -25,25 +25,25 @@ public class AIShooter {
         Cell firstCell = getFirstEdgeDamagedCell(ship);
         Cell lastCell = getLastEdgeDamagedCell(ship);
         return firstCell == lastCell
-                ? calculateCellForDamagedShipSingleCell(firstCell, _field.getBiggestAliveShipSize(false))
+                ? calculateCellForDamagedShipSingleCell(firstCell, _field.getSmallestAliveShipSize(false))
                 : calculateCellForDamagedShipMultiCell(firstCell, lastCell);
     }
 
-    private Cell calculateCellFirstShot(int biggestAliveShipSize) {
+    private Cell calculateCellFirstShot(int smallestAliveShipSize) {
         Cell cell;
         while (true) {
             cell = _field.getRandomFreeCell();
-            if (checkAbove(cell, biggestAliveShipSize, true)
-                    || checkBelow(cell, biggestAliveShipSize, true)
-                    || checkRight(cell, biggestAliveShipSize, true)
-                    || checkLeft(cell, biggestAliveShipSize, true)) {
+            if (checkAbove(cell, smallestAliveShipSize, true)
+                    || checkBelow(cell, smallestAliveShipSize, true)
+                    || checkRight(cell, smallestAliveShipSize, true)
+                    || checkLeft(cell, smallestAliveShipSize, true)) {
                 return _field.getCell(cell.getX(), cell.getY());
             }
         }
     }
 
-    private Cell calculateCellForDamagedShipSingleCell(Cell cell, int biggestAliveShipSize) {
-        int spaceToNeed = biggestAliveShipSize - 1;
+    private Cell calculateCellForDamagedShipSingleCell(Cell cell, int smallestAliveShipSize) {
+        int spaceToNeed = smallestAliveShipSize - 1;
         if (checkAbove(cell, spaceToNeed, false)) {
             return _field.getCell(cell.getX(), cell.getY() + 1);
         }
@@ -62,13 +62,13 @@ public class AIShooter {
     private Cell calculateCellForDamagedShipMultiCell(Cell firstCell, Cell lastCell) {
         boolean isHorizontal = firstCell.getY() == lastCell.getY();
         int damagedSize;
-        int biggestDamagedAliveShipSize;
+        int smallestDamagedAliveShipSize;
         int spaceToNeed;
 
         if (isHorizontal) {
             damagedSize = Math.abs(firstCell.getX() - lastCell.getX()) + 1;
-            biggestDamagedAliveShipSize = _field.getBiggestDamagedAliveShipSize(damagedSize);
-            spaceToNeed = biggestDamagedAliveShipSize - damagedSize;
+            smallestDamagedAliveShipSize = _field.getSmallestDamagedAliveShipSize(damagedSize);
+            spaceToNeed = smallestDamagedAliveShipSize - damagedSize;
 
             if (checkRight(firstCell, spaceToNeed, false)) {
                 return _field.getCell(firstCell.getX() + 1, firstCell.getY());
@@ -84,8 +84,8 @@ public class AIShooter {
             }
         } else {
             damagedSize = Math.abs(firstCell.getY() - lastCell.getY()) + 1;
-            biggestDamagedAliveShipSize = _field.getBiggestDamagedAliveShipSize(damagedSize);
-            spaceToNeed = biggestDamagedAliveShipSize - damagedSize;
+            smallestDamagedAliveShipSize = _field.getSmallestDamagedAliveShipSize(damagedSize);
+            spaceToNeed = smallestDamagedAliveShipSize - damagedSize;
 
             if (checkAbove(firstCell, spaceToNeed, false)) {
                 return _field.getCell(firstCell.getX(), firstCell.getY() + 1);
@@ -112,7 +112,7 @@ public class AIShooter {
             i++;
             freeSpace++;
         }
-        return freeSpace >= spaceToNeed;
+        return freeSpace == spaceToNeed;
     }
 
     private boolean checkBelow(Cell cell, int spaceToNeed, boolean firstShot) {
@@ -124,7 +124,7 @@ public class AIShooter {
             i++;
             freeSpace++;
         }
-        return freeSpace >= spaceToNeed;
+        return freeSpace == spaceToNeed;
     }
 
     private boolean checkRight(Cell cell, int spaceToNeed, boolean firstShot) {
@@ -136,7 +136,7 @@ public class AIShooter {
             i++;
             freeSpace++;
         }
-        return freeSpace >= spaceToNeed;
+        return freeSpace == spaceToNeed;
     }
 
     private boolean checkLeft(Cell cell, int spaceToNeed, boolean firstShot) {
@@ -148,7 +148,7 @@ public class AIShooter {
             i++;
             freeSpace++;
         }
-        return freeSpace >= spaceToNeed;
+        return freeSpace == spaceToNeed;
     }
 
     private Cell getFirstEdgeDamagedCell(Ship ship) {

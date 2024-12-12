@@ -42,7 +42,6 @@ public class Field {
         return _cells[x][y];
     }
 
-    // TODO: нужен?
     public Cell[][] getCells() {
         return _cells;
     }
@@ -118,7 +117,7 @@ public class Field {
         return null;
     }
 
-    public int getBiggestAliveShipSize(boolean withSingles) {
+    public int getSmallestAliveShipSize(boolean withSingles) {
         for (int i = FIELD_SIDE_SIZE - 1; i >= 0; i--) {
             Ship ship = _ships[i];
             if (ship.isAlive() && (withSingles || ship.getSize() > 1)) {
@@ -128,10 +127,10 @@ public class Field {
         return 0;
     }
 
-    public int getBiggestDamagedAliveShipSize(int damagedSize) {
+    public int getSmallestDamagedAliveShipSize(int damagedSize) {
         for (int i = FIELD_SIDE_SIZE - 1; i >= 0; i--) {
             Ship ship = _ships[i];
-            if (ship.isDamaged() && ship.isAlive() && ship.getSize() > damagedSize && ship.getSize() > 1) {
+            if (ship.isDamaged() && ship.isAlive() && ship.getSize() > damagedSize) {
                 return ship.getSize();
             }
         }
