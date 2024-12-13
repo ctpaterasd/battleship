@@ -23,6 +23,7 @@ public class GameWindow extends JFrame {
     private ShipList shipList;
     private Checkbox horizontalCheckBox;
     private JButton startGameButton;
+    private JButton autoBoardButton;
 
     public GameWindow() {
         mainFrame = new JFrame("BattleShip");
@@ -80,7 +81,47 @@ public class GameWindow extends JFrame {
                     cell.setState(CellUI.State.INGAME_STATE_AI);
                 }
             }
-            startGameButton.setEnabled(false);
+            switchStartButton();
+            autoBoardButton.setEnabled(false);
+        });
+    }
+
+    private void switchStartButton() {
+        for (ActionListener actionListener : startGameButton.getActionListeners()) {
+            startGameButton.removeActionListener(actionListener);
+        }
+        startGameButton.setText("Новая игра");
+        startGameButton.addActionListener(_ -> {
+            mainFrame.getContentPane().removeAll();
+            mainFrame.repaint();
+            init();
+        });
+    }
+
+    private void initAutoBoardButton() {
+        autoBoardButton.addActionListener(_ -> {
+            for (Ship ship : playerField.getShips()) {
+                if (ship.isOnField()) {
+                    unboardShip(ship);
+                }
+                for (CellUI[] cellA : playerCells) {
+                    for (CellUI cell : cellA) {
+                        cell.setBackground(Color.CYAN);
+                        cell.setState(CellUI.State.EMPTY_PREPARE_STATE);
+                    }
+                }
+            }
+            new AIFieldPreparer().boardShips(playerField);
+            for (CellUI[] cellA : playerCells) {
+                for (CellUI cell : cellA) {
+                    if (cell.getCell().hasShip()) {
+                        cell.setBackground(Color.LIGHT_GRAY);
+                        cell.setState(CellUI.State.BOARDED_PREPARE_STATE);
+                        cell.setEnabled(true);
+                    }
+                }
+            }
+            shipList.removeAll();
         });
     }
 
@@ -93,6 +134,14 @@ public class GameWindow extends JFrame {
     }
 
     public void gameOver(boolean isPlayerWon) {
+        for (CellUI[] cellUIA : aiCells) {
+            for (CellUI cellUI : cellUIA) {
+                Cell cell = cellUI.getCell();
+                if (!cell.isDamaged() && cell.hasShip()) {
+                    cellUI.setBackground(Color.LIGHT_GRAY);
+                }
+            }
+        }
         JOptionPane.showMessageDialog(this,
                 (isPlayerWon ? "Игрок" : "Компьютер") + " победил", "Игра закончена", JOptionPane.INFORMATION_MESSAGE);
         mainFrame.getContentPane().removeAll();
@@ -168,15 +217,18 @@ public class GameWindow extends JFrame {
         textPanel.add(horizontalCheckBox, BorderLayout.SOUTH);
 
         startGameButton = new JButton("Начать игру");
+        autoBoardButton = new JButton("Авторасстановка");
 
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout(new BorderLayout());
         bottomPanel.add(horizontalCheckBox, BorderLayout.NORTH);
-        bottomPanel.add(startGameButton, BorderLayout.SOUTH);
+        bottomPanel.add(startGameButton, BorderLayout.CENTER);
+        bottomPanel.add(autoBoardButton, BorderLayout.SOUTH);
 
         textPanel.add(bottomPanel, BorderLayout.SOUTH);
 
         startButtonEnable();
+        initAutoBoardButton();
 
         return textPanel;
     }

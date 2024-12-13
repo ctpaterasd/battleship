@@ -5,10 +5,7 @@ import ru.kaifkaby.battleship.entity.Ship;
 import ru.kaifkaby.battleship.exception.GameplayException;
 
 import javax.swing.*;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ShipList extends JList {
@@ -33,6 +30,13 @@ public class ShipList extends JList {
 
     public void deleteShip(Ship ship) {
         ((ShipHolderUI) listModel.getElementAt(ship.getSize() - 1)).remove(ship);
+        repaint();
+    }
+
+    public void removeAll() {
+        for (Object o : listModel.toArray()) {
+            ((ShipHolderUI) o).removeAll();
+        }
         repaint();
     }
 
@@ -69,6 +73,10 @@ public class ShipList extends JList {
 
         public void remove(Ship ship) {
             _ships.remove(ship);
+        }
+
+        public void removeAll() {
+            _ships.removeAll(_ships);
         }
     }
 }
